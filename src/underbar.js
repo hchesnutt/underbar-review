@@ -115,6 +115,13 @@
     // map() is a useful primitive iteration function that works a lot
     // like each(), but in addition to running the operation on all
     // the members, it also maintains an array of results.
+    
+    let results = [];
+    // iterate through array (collection), invoke iterator on each, 
+    _.each(collection, item => {
+      results.push(iterator(item));
+    });
+    return results;
   };
 
   /*
@@ -156,6 +163,17 @@
   //   }); // should be 5, regardless of the iterator function passed in
   //          No accumulator is given so the first element is used.
   _.reduce = function(collection, iterator, accumulator) {
+    var memo = accumulator === undefined ? collection[0] : accumulator;
+    if (accumulator === undefined) {      
+      for (var i = 1; i < collection.length; i++) {
+        memo = iterator(memo, collection[i]);
+      }
+    } else {
+      _.each(collection, item => {
+        memo = iterator(memo, item);
+      })
+    }
+    return memo;
   };
 
   // Determine if the array or object contains a given value (using `===`).
@@ -172,15 +190,22 @@
 
 
   // Determine whether all of the elements match a truth test.
-  _.every = function(collection, iterator) {
-    // TIP: Try re-using reduce() here.
+  _.every = function(collection, iterator = item => item) {
+    var valid = true;
+    _.each(collection, function(item){
+      if (!iterator(item)) {
+        if (valid) {
+          return valid = false;
+        }
+      }
+    })
+    return valid;
   };
+
 
   // Determine whether any of the elements pass a truth test. If no iterator is
   // provided, provide a default one
-  _.some = function(collection, iterator) {
-    // TIP: There's a very clever way to re-use every() here.
-  };
+  _.some = (collection, iterator = item => item) => !_.every(collection, item => !iterator(item));
 
 
   /**
@@ -202,11 +227,27 @@
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
   _.extend = function(obj) {
+    var args = [...arguments];
+    for (var i = 0; i < args.length; i++) {
+      var extendObj = args[i];
+      for (var key in extendObj) {
+        obj[key] = extendObj[key];
+      }
+    }
+    return obj;
   };
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
   _.defaults = function(obj) {
+    var args = [...arguments];
+    for (var i = 0; i < args.length; i++) {
+      var extendObj = args[i];
+      for (var key in extendObj) {
+        if (!obj.hasOwnProperty(key)) obj[key] = extendObj[key];
+      }
+    }
+    return obj;
   };
 
 
@@ -250,6 +291,18 @@
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
+    var memory = {};
+    var memoized = function() {
+      var serialized = JSON.stringify([...arguments]);
+      if (memory[serialized]) {
+        return memory[serialized];
+      } else {
+        memory[serialized] = func.apply(this, [...arguments]);
+        
+      }
+      return memory[serialized];
+    }
+    return memoized;
   };
 
   // Delays a function for the given number of milliseconds, and then calls
@@ -259,6 +312,8 @@
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
   _.delay = function(func, wait) {
+    var args = [...arguments];
+    return setTimeout(...arguments);
   };
 
 
@@ -273,6 +328,17 @@
   // input array. For a tip on how to make a copy of an array, see:
   // http://mdn.io/Array.prototype.slice
   _.shuffle = function(array) {
+    // duplicate array into new array
+    let shuffled = array.slice();
+    // for each element in array, choose random position, swap the two items
+    for (let i = 0; i < shuffled.length; i++) {
+      let randIndex = Math.floor(Math.random() * array.length);
+      let temp = shuffled[randIndex];
+      shuffled[randIndex] = shuffled[i];
+      shuffled[i] = temp;
+    }
+    // return new array
+    return shuffled;
   };
 
 
@@ -287,6 +353,10 @@
   // Calls the method named by functionOrKey on each value in the list.
   // Note: You will need to learn a bit about .apply to complete this.
   _.invoke = function(collection, functionOrKey, args) {
+    // foreach item in collection invoke functionOrKey
+    _.each(collection, item => {
+      item[functionOrKey].apply(item, args);
+    })
   };
 
   // Sort the object's values by a criterion produced by an iterator.
