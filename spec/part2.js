@@ -419,7 +419,6 @@
 
         memoSpy(10);
         expect(spy).to.have.been.calledOnce;
-        debugger;
         memoSpy(10);
         expect(spy).to.have.been.calledOnce;
       });

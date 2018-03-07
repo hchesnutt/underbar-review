@@ -31,16 +31,11 @@
 
   // Return an array of the first n elements of an array. If n is undefined,
   // return just the first element.
-  _.first = function(array, n) {
-    return n === undefined ? array[0] : array.slice(0, n);
-  };
+  _.first = (array, n) => n === undefined ? array[0] : array.slice(0, n);
 
   // Like first, but for the last elements. If n is undefined, return just the
   // last element.
-  _.last = function(array, n) {
-    var floor = array.length - n < 0 ? 0 : array.length - n;
-    return n === undefined ? array[array.length - 1] : array.slice(floor);
-  };
+  _.last = (array, n) => n === undefined ? array[array.length - 1] : array.slice(array.length - n < 0 ? 0 : array.length - n);
 
   // Call iterator(value, key, collection) for each element of collection.
   // Accepts both arrays and objects.
@@ -63,22 +58,17 @@
   // Returns the index at which value can be found in the array, or -1 if value
   // is not present in the array.
   _.indexOf = function(array, target) {
-    // TIP: Here's an example of a function that needs to iterate, which we've
-    // implemented for you. Instead of using a standard `for` loop, though,
-    // it uses the iteration helper `each`, which you will need to write.
     var result = -1;
-
     _.each(array, function(item, index) {
       if (item === target && result === -1) {
         result = index;
       }
     });
-
     return result;
   };
 
   // Return all elements of an array that pass a truth test.
-  _.filter = function(collection, test) {
+  _.filter = (collection, test) => {
     let results = [];
     for (var i = 0; i < collection.length; ++i) {
       test(collection[i]) ? results.push(collection[i]) : i;
@@ -94,15 +84,13 @@
     let results = [];
     if (isSorted) {
       //[1, 2, 2, 3, 4, 4]
-      // for each invoke iterator
+      var iterated = _.map(array, item => iterator(item));
       //[true, false, false, false, false, false, false]
-      // call uniq unsorted
-      //[true, false]
-      // call indexOf on each
+      var uniqed = _.uniq(iterated);
+      console.log(uniqed)
+      //[true, false] 
+      results = _.map(uniqed, item => array[_.indexOf(uniqed, item)])
       //[1, 2]
-      let iterated = _.each(array, item => {
-        iterator(item);
-      });
     } else {
       results = new Set(array);
     }
@@ -354,9 +342,10 @@
   // Note: You will need to learn a bit about .apply to complete this.
   _.invoke = function(collection, functionOrKey, args) {
     // foreach item in collection invoke functionOrKey
-    _.each(collection, item => {
-      item[functionOrKey].apply(item, args);
-    })
+    return _.map(collection, item => {
+      var method = item[functionOrKey] ? item[functionOrKey] : functionOrKey;
+      return method.apply(item, args);
+    });
   };
 
   // Sort the object's values by a criterion produced by an iterator.
